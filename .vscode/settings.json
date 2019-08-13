@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "optional": "cpp",
-        "system_error": "cpp"
-    },
-    "editor.formatOnSave": true,
-    "clang-format.executable": "/usr/bin/clang-format"
-}
