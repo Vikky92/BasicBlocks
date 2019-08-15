@@ -5,36 +5,43 @@
 // Thread-safe implementatation of std::queue
 template <typename T>
 
-class SafeQueue {
- private:
+class SafeQueue
+{
+private:
   std::queue<T> mQueue;
   std::mutex mMutex;
 
- public:
+public:
   SafeQueue() {}
 
-  SafeQueue(SafeQueue& cQueue) {
+  SafeQueue(SafeQueue &cQueue)
+  {
     // TODO:
   }
 
   ~SafeQueue() {}
 
-  bool empty() {
+  bool empty()
+  {
     std::unique_lock<std::mutex> tmpLock(mMutex);
     return mQueue.empty();
   }
 
-  int size() {
+  int size()
+  {
     std::unique_lock<std::mutex> tmpLock(mMutex);
     return mQueue.size();
   }
 
-  void push(T& t) {
+  void push(T &t)
+  {
     std::unique_lock<std::mutex> tmpLock(mMutex);
     mQueue.push(t);
   }
-  bool pop(T& t) {
-    if (mQueue.empty()) {
+  bool pop(T &t)
+  {
+    if (mQueue.empty())
+    {
       return false;
     }
     t = std::move(mQueue.front());

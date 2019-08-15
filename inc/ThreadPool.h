@@ -8,27 +8,33 @@
 #include <vector>
 
 #include "SafeQueue.h"
-class ThreadPool {
- private:
-  class ThreadWorker {
-   private:
+class ThreadPool
+{
+private:
+  class ThreadWorker
+  {
+  private:
     int mId;
     ThreadPool *mPool;
 
-   public:
+  public:
     ThreadWorker(ThreadPool *pool, const int id) : mPool(pool), mId(id) {}
 
-    void operator()() {
+    void operator()()
+    {
       std::function<void()> func;
       bool run;
-      while (!mPool->mShut) {
+      while (!mPool->mShut)
+      {
         std::unique_lock<std::mutex> tmpLock(mPool->mMutex);
-        if (mPool->mQueue.empty()) {
+        if (mPool->mQueue.empty())
+        {
           mPool->mCv.wait(tmpLock);
         }
         run = mPool->mQueue.pop(func);
       }
-      if (run) {
+      if (run)
+      {
         func();
       }
     }
@@ -40,10 +46,12 @@ class ThreadPool {
   std::mutex mMutex;
   std::condition_variable mCv;
 
- public:
+public:
   ThreadPool(const int n_threads)
-      : mTasks(std::vector<std::thread>(n_threads)), mShut(false) {
-    for (int i = 0; i < n_threads; i++) {
+      : mTasks(std::vector<std::thread>(n_threads)), mShut(false)
+  {
+    for (int i = 0; i < n_threads; i++)
+    {
       mTasks[i] = std::thread(ThreadWorker(this, i));
     }
   }
@@ -57,18 +65,22 @@ class ThreadPool {
   ThreadPool &operator=(const ThreadPool &) = delete;
   ThreadPool &operator=(ThreadPool &&) = delete;
 
-  void shutdown() {
+  void shutdown()
+  {
     mShut = true;
     mCv.notify_all();
 
-    for (int i = 0; i < mTasks.size(); i++) {
-      if (mTasks[i].joinable()) mTasks[i].join();
+    for (int i = 0; i < mTasks.size(); i++)
+    {
+      if (mTasks[i].joinable())
+        mTasks[i].join();
     }
   }
 
   // Push a function to be executed asynchronously to the ThreadPool
   template <typename F, typename... Args>
-  auto push(F &&f, Args &&... args) -> std::future<decltype(f(args...))> {
+  auto push(F &&f, Args &&... args) -> std::future<decltype(f(args...))>
+  {
     // Creating a function with bounded parameters
     std::function<decltype(f(args...))()> tmpFunc =
         std::bind(std::forward<F>(f), std::forward<Args>(args)...);
