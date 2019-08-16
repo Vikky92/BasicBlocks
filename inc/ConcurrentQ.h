@@ -6,12 +6,12 @@ using namespace std;
 
 template <typename Data>
 class CQueue {
- private:
+private:
   std::queue<Data> mQueue;
   static std::mutex mMutex;
   static condition_variable mCv;
 
- public:
+public:
   void push(Data const& data) {
     mMutex.lock();
     mQueue.push(data);

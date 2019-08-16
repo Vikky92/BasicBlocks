@@ -8,20 +8,16 @@ using namespace std;
 
 const int tenMill = 10000000;
 
-class Singleton
-{
+class Singleton {
 public:
-  static Singleton *getInstance()
-  {
+  static Singleton *getInstance() {
     Singleton *ins = instance.load();
     {
-      if (!ins)
-      {
+      if (!ins) {
         mMutex.lock();
         ins = instance.load();
 
-        if (!ins)
-        {
+        if (!ins) {
           ins = new Singleton();
           instance.store(ins);
         }
