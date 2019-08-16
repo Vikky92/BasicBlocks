@@ -8,33 +8,29 @@
 #include <vector>
 
 #include "SafeQueue.h"
-class ThreadPool
-{
+class ThreadPool {
 private:
-  class ThreadWorker
-  {
+  class ThreadWorker {
   private:
     int mId;
     ThreadPool *mPool;
 
   public:
-    ThreadWorker(ThreadPool *pool, const int id) : mPool(pool), mId(id) {}
+    ThreadWorker(ThreadPool *pool, const int id)
+      : mPool(pool)
+      , mId(id) {}
 
-    void operator()()
-    {
+    void operator()() {
       std::function<void()> func;
       bool run;
-      while (!mPool->mShut)
-      {
+      while (!mPool->mShut) {
         std::unique_lock<std::mutex> tmpLock(mPool->mMutex);
-        if (mPool->mQueue.empty())
-        {
+        if (mPool->mQueue.empty()) {
           mPool->mCv.wait(tmpLock);
         }
         run = mPool->mQueue.pop(func);
       }
-      if (run)
-      {
+      if (run) {
         func();
       }
     }
@@ -48,15 +44,13 @@ private:
 
 public:
   ThreadPool(const int n_threads)
-      : mTasks(std::vector<std::thread>(n_threads)), mShut(false)
-  {
-    for (int i = 0; i < n_threads; i++)
-    {
+    : mTasks(std::vector<std::thread>(n_threads))
+    , mShut(false) {
+    for (int i = 0; i < n_threads; i++) {
       mTasks[i] = std::thread(ThreadWorker(this, i));
     }
   }
-  ~ThreadPool()
-  {
+  ~ThreadPool() {
     this->shutdown();
   }
   ThreadPool(const ThreadPool &) = delete;
@@ -65,13 +59,11 @@ public:
   ThreadPool &operator=(const ThreadPool &) = delete;
   ThreadPool &operator=(ThreadPool &&) = delete;
 
-  void shutdown()
-  {
+  void shutdown() {
     mShut = true;
     mCv.notify_all();
 
-    for (int i = 0; i < mTasks.size(); i++)
-    {
+    for (int i = 0; i < mTasks.size(); i++) {
       if (mTasks[i].joinable())
         mTasks[i].join();
     }
@@ -79,14 +71,13 @@ public:
 
   // Push a function to be executed asynchronously to the ThreadPool
   template <typename F, typename... Args>
-  auto push(F &&f, Args &&... args) -> std::future<decltype(f(args...))>
-  {
+  auto push(F &&f, Args &&... args) -> std::future<decltype(f(args...))> {
     // Creating a function with bounded parameters
     std::function<decltype(f(args...))()> tmpFunc =
-        std::bind(std::forward<F>(f), std::forward<Args>(args)...);
+      std::bind(std::forward<F>(f), std::forward<Args>(args)...);
     // Making a shared ptr to be able to copied / assigned to the threadPool
     auto taskPtr =
-        std::make_shared<std::packaged_task<decltype(f(args...))()>>(tmpFunc);
+      std::make_shared<std::packaged_task<decltype(f(args...))()>>(tmpFunc);
 
     // Wrapping into a void function
     std::function<void()> wFunc = [taskPtr]() { (*taskPtr)(); };
