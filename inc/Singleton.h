@@ -8,31 +8,35 @@ using namespace std;
 
 const int tenMill = 10000000;
 
-class Singleton {
+class Singleton
+{
 public:
-  static Singleton *getInstance() {
-    Singleton *ins = instance.load();
-    {
-      if (!ins) {
-        mMutex.lock();
-        ins = instance.load();
+	static Singleton* getInstance()
+	{
+		Singleton* ins = instance.load();
+		{
+			if(!ins)
+			{
+				mMutex.lock();
+				ins = instance.load();
 
-        if (!ins) {
-          ins = new Singleton();
-          instance.store(ins);
-        }
-      }
-    }
+				if(!ins)
+				{
+					ins = new Singleton();
+					instance.store(ins);
+				}
+			}
+		}
 
-    return ins;
-  }
+		return ins;
+	}
 
 private:
-  Singleton() = default;
-  ~Singleton() = default;
-  Singleton(const Singleton &) = delete;
-  Singleton &operator=(const Singleton &) = delete;
+	Singleton() = default;
+	~Singleton() = default;
+	Singleton(const Singleton&) = delete;
+	Singleton& operator=(const Singleton&) = delete;
 
-  static std::atomic<Singleton *> instance;
-  static std::mutex mMutex;
+	static std::atomic<Singleton*> instance;
+	static std::mutex mMutex;
 };
